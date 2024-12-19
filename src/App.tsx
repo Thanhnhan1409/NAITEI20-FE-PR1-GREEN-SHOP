@@ -17,6 +17,8 @@ import LoadingCommon from "./components/LoadingCommon";
 import AdminLayout from "./layouts/Admin/Layout";
 import UserManagement from "./page/UserManagement/page";
 import ProductManagement from "./page/ProductManagement/page";
+import Categories from "./page/admin/categories";
+import OrdersManagement from "./page/admin/orders-list";
 
 const router = createBrowserRouter([
   {
@@ -84,6 +86,14 @@ const router = createBrowserRouter([
       {
         path: "products",
         element: <ProductManagement />,
+      },
+      {
+        path: "categories",
+        element: <Categories />,
+      },
+      {
+        path: "orders",
+        element: <OrdersManagement />,
       }
     ],
   }
