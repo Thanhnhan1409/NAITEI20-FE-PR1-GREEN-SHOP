@@ -4,6 +4,8 @@ import profile from '../assets/icons/profile.png'
 import setting from '../assets/icons/setting.png'
 import logout from '../assets/icons/logout.png'
 import product from '../assets/icons/product.png'
+import category from '../assets/icons/category.webp'
+import cart from '../assets/icons/cart.webp'
 import { useAuth } from '../contexts/AuthContext'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -25,6 +27,16 @@ const menuItems = [
         icon: product,
         label: 'Products',
         href: '/admin/products'
+      },
+      {
+        icon: category,
+        label: 'Categories',
+        href: '/admin/categories'
+      },
+      {
+        icon: cart,
+        label: 'Orders',
+        href: '/admin/orders'
       }
     ]
   },
