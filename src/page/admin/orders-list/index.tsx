@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Modal, Table } from "antd";
+import { Breadcrumb, Button, Input, Modal, Table } from "antd";
 import { Link } from "react-router-dom";
 import React, { useEffect } from "react";
 import { Order } from "../../../types/order.type";
@@ -6,7 +6,6 @@ import { useLoadingStore } from "../../../stores/loadingStore";
 import http from "../../../utils/http";
 import { formatNumberWithDots } from "../../../utils";
 import { CartItem } from "../../../types/cartItem.type";
-import { Product } from "../../../types/product.type";
 
 const OrdersManagement = () => {
   const [loading, setLoading] = React.useState(false);
@@ -14,14 +13,17 @@ const OrdersManagement = () => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [open, setOpen] = React.useState(false);
   const [currentDetailOder, setCurrentDetailOder] = React.useState<Order>();
+  const [searchValue, setSearchValue] = React.useState('');
+  const [showOrders, setShowOrders] = React.useState<Order[]>([]);
 
   const { setIsLoading } = useLoadingStore();
-
+  const { Search } = Input;
   const getOrdersList = async () => {
     try {
       setIsLoading(true);
       const res = await http.get("/orders");
       setOrders(res.data);
+      setShowOrders(res.data);
     } catch (error) {
       console.log(error);
     } finally {
@@ -60,6 +62,7 @@ const OrdersManagement = () => {
       key: "user",
       render: (_: number, record: Order) => <span>{record.user.fullName}</span>,
       width: "20%",
+      sorter: (a: Order, b: Order) => a.user.fullName.localeCompare(b.user.fullName),
     },
     {
       title: "Tổng tiền",
@@ -67,12 +70,14 @@ const OrdersManagement = () => {
       key: "total",
       render: (_: number, record: Order) => <p className="py-0.5 px-4 border rounded-lg w-fit border-[#22c55e] text-[grey]">{formatNumberWithDots(record.total)} đ</p>,
       width: "20%",
+      sorter: (a: Order, b: Order) => a.total - b.total,
     },
     {
       title: "Ngày mua hàng",
       dataIndex: "date",
       key: "date",
       render: (_: number, record: Order) => <span>{new Date(record.date).toLocaleDateString()}</span>,
+      sorter: (a: Order, b: Order) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     },
     {
       title: "",
@@ -102,6 +107,7 @@ const OrdersManagement = () => {
       key: "product",
       render: (_: number, record: CartItem) => <span>{record.name}</span>,
       width: "30%",
+      sorter: (a: CartItem, b: CartItem) => a.name.localeCompare(b.name),
     },
     {
       title: "Hình ảnh",
@@ -115,6 +121,7 @@ const OrdersManagement = () => {
       key: "price",
       render: (_: number, record: CartItem) => <p>{formatNumberWithDots(record.price)} đ</p>,
       width: "20%",
+      sorter: (a: CartItem, b: CartItem) => a.price - b.price,
     },
     {
       title: "Số lượng",
@@ -122,11 +129,17 @@ const OrdersManagement = () => {
       key: "quantity",
       render: (_: number, record: CartItem) => <p>x{ record.quantity }</p>,
       width: "20%",
+      sorter: (a: CartItem, b: CartItem) => a.quantity - b.quantity,
     },
   ];
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  }
+
+  const onSearch = () => {
+    const filteredOrders = orders.filter(order => order.user.fullName.toLowerCase().includes(searchValue.toLowerCase()));
+    setShowOrders(filteredOrders);
   }
 
   return (
@@ -143,9 +156,12 @@ const OrdersManagement = () => {
           ]}
         />
       </div>
-      <h2 className="text-2xl font-semibold text-green-600 mb-3 uppercase pb-6">Danh sách đơn hàng</h2>
+      <div className="flex items-center justify-between pb-6">
+        <h2 className="text-2xl font-semibold text-green-600 mb-3 uppercase">Danh sách đơn hàng</h2>
+        <Search placeholder="Tìm kiếm" value={searchValue} onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setSearchValue(e.target.value)} onSearch={onSearch} style={{ width: 250 }} />
+      </div>
       <Table
-        dataSource={orders}
+        dataSource={showOrders}
         columns={columns}
         rowKey="id"
         loading={loading}

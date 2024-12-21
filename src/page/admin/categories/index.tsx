@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Card, Form, Input, Modal, Space, Table, Typography, message } from "antd";
+import { Breadcrumb, Button, Card, Form, Input, Modal, Space, Table, message } from "antd";
 import { useEffect, useState } from "react";
 import http from "../../../utils/http";
 import { useLoadingStore } from "../../../stores/loadingStore";
@@ -23,14 +23,19 @@ const CategoriesManagement = () => {
   const [deleteId, setDeleteId] = useState<string>('');
   const [currentId, setCurrentId] = useState<string>('');
   const [mode, setMode] = useState<EMode>(EMode.ADD);
+  const [showCategories, setShowCategories] = useState<Category[]>([]);
+  const [searchValue, setSearchValue] = useState<string>('');
 
   const [form] = Form.useForm();
+
+  const { Search } = Input;
 
   const getCategoryList = async () => {
     try {
       setIsLoading(true);
       const res = await http.get("/categories");
       setCategories(res.data);
+      setShowCategories(res.data);
     } catch (error) {
       console.log(error);
     } finally {
@@ -140,6 +145,7 @@ const CategoriesManagement = () => {
       dataIndex: "name",
       key: "name",
       width: "30%",
+      sorter: (a: Category, b: Category) => a.name.localeCompare(b.name),
     },
     {
       title: "",
@@ -190,6 +196,11 @@ const CategoriesManagement = () => {
     form.resetFields();
   }
 
+  const onSearch = () => {
+    const showCategories = categories.filter((category: Category) => category.name.toLowerCase().includes(searchValue.toLowerCase()));
+    setShowCategories(showCategories);
+  }
+
   return (
     <div className="container w-[1100px] mx-auto mb-40">
       <div className="mb-5">
@@ -204,19 +215,22 @@ const CategoriesManagement = () => {
           ]}
         />
       </div>
-      <div className="flex justify-between items-center pb-6 ">
+      <div className="flex justify-between items-center pb-6 mb-5">
         <h2 className="text-2xl font-semibold text-green-600 mb-3 uppercase">Danh sách danh mục sản phẩm</h2>
-        <Button
-          type="primary"
-          className="mb-5"
-          icon={<PlusOutlined />}
-          onClick={openModel}
-        >
-          Thêm danh mục
-        </Button>
+        <div className="flex items-center gap-3">
+          <Search placeholder="Tìm kiếm" value={searchValue} onChange={e => setSearchValue(e.target.value)} onSearch={onSearch} style={{ width: 250 }} />
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={openModel}
+          >
+            Thêm danh mục
+          </Button>
+        </div>
+
       </div>
       <Table
-        dataSource={categories}
+        dataSource={showCategories}
         columns={columns}
         rowKey="id"
         loading={loading}

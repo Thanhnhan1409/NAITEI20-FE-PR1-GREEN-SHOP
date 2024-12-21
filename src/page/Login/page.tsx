@@ -27,7 +27,7 @@ const Login = () => {
         const user = response.data[0];
         if (user.role === 'admin') {
           login(user.token, user.role, user.id, user.fullName);
-          navigate("/admin");
+          navigate("/admin/users");
           return;
         }
         if (user.status === "banned") {
